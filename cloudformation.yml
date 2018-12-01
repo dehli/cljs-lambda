@@ -1,0 +1,30 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  DeployStack:
+    Type: String
+    Default: ""
+    AllowedValues:
+      - true
+      - ""
+
+Conditions:
+  FullDeploy:
+    Fn::Equals:
+      - !Ref DeployStack
+      - true
+
+Resources:
+  DeployBucket:
+    Type: AWS::S3::Bucket
+
+  CljsRuntime:
+    Condition: FullDeploy
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: example.handler
+      Runtime: provided
+      CodeUri: ./runtime
+      MemorySize: 1024
