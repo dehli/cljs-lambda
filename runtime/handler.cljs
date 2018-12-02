@@ -1,5 +1,6 @@
 (ns runtime.handler
-  (:require [clojure.string :as string]
+  (:require [cljs.js :refer [eval-str]]
+            [clojure.string :as string]
             [goog.object :as gobj]))
 
 ;; Node.js Interop
@@ -18,6 +19,8 @@
 (defonce base-path
   (str "http://" (env "AWS_LAMBDA_RUNTIME_API")
        "/2018-06-01/runtime/invocation/"))
+
+(defonce handler (env "_HANDLER"))
 
 ;; Lambda lifecycle methods
 
@@ -43,4 +46,14 @@
   (let [headers (exec-sync "mktemp")
         event (curl-request headers)]
 
-    (curl-response headers 100)))
+    (prn handler)
+
+    (try
+      (eval-str (atom nil)
+                (str "(" handler ")")
+                (fn [{:keys [value]}]
+                  (curl-response headers value)))
+
+      (catch :exception e
+        (prn e)
+        (curl-response headers "ERROR")))))

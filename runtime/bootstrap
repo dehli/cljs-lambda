@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-$LAMBDA_TASK_ROOT/node_modules/lumo-cljs/bin/lumo \
-  -e "$(cat handler.cljs)"
-
-# Execute the handler function from the script
-# RESPONSE=$(./node_modules/lumo-cljs/bin/lumo -m $_HANDLER "$EVENT_DATA")
+/opt/node_modules/lumo-cljs/bin/lumo \
+  -e "$(cat /opt/handler.cljs)" \
+  -c "$LAMBDA_TASK_ROOT"

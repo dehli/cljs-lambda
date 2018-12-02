@@ -1,6 +1,5 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   DeployStack:
@@ -22,9 +21,33 @@ Resources:
 
   CljsRuntime:
     Condition: FullDeploy
-    Type: AWS::Serverless::Function
+    Type: AWS::Lambda::LayerVersion
     Properties:
-      Handler: example.handler
+      Content: ./runtime
+
+  CljsHandler:
+    Condition: FullDeploy
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: example.handler/-main
+      Role: !GetAtt LambdaRole.Arn
       Runtime: provided
-      CodeUri: ./runtime
+      Code: ./handler
       MemorySize: 1024
+      Layers:
+        - !Ref CljsRuntime
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
