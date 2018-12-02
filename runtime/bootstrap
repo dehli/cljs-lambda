@@ -2,20 +2,8 @@
 
 set -euo pipefail
 
-cd $LAMBDA_TASK_ROOT
+$LAMBDA_TASK_ROOT/node_modules/lumo-cljs/bin/lumo \
+  -e "$(cat handler.cljs)"
 
-# Processing
-while true
-do
-  HEADERS="$(mktemp)"
-
-  # Get an event
-  EVENT_DATA=$(curl -sS -LD "$HEADERS" -X GET "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/next")
-  REQUEST_ID=$(grep -Fi Lambda-Runtime-Aws-Request-Id "$HEADERS" | tr -d '[:space:]' | cut -d: -f2)
-
-  # Execute the handler function from the script
-  RESPONSE=$(./node_modules/lumo-cljs/bin/lumo -m $_HANDLER "$EVENT_DATA")
-
-  # Send the response
-  curl -X POST "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$REQUEST_ID/response" -d "$RESPONSE"
-done
+# Execute the handler function from the script
+# RESPONSE=$(./node_modules/lumo-cljs/bin/lumo -m $_HANDLER "$EVENT_DATA")
