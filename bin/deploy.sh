@@ -5,7 +5,7 @@ STACK_NAME=cp-test
 export AWS_PROFILE=personal
 
 # Install node_modules
-[[ -d runtime/node_modules ]] || npm --prefix runtime ci
+[[ -d runtime/cljs-runtime/node_modules ]] || npm --prefix runtime/cljs-runtime ci
 
 # CloudFormation parameters
 parameter_overrides=""

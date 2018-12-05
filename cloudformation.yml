@@ -29,7 +29,7 @@ Resources:
     Condition: FullDeploy
     Type: AWS::Lambda::Function
     Properties:
-      Handler: example.handler/-main
+      Handler: example.handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: provided
       Code: ./handler

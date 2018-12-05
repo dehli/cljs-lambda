@@ -2,6 +2,6 @@
 
 set -euo pipefail
 
-/opt/node_modules/lumo-cljs/bin/lumo \
-  -e "$(cat /opt/handler.cljs)" \
-  -c "$LAMBDA_TASK_ROOT"
+/opt/cljs-runtime/node_modules/lumo-cljs/bin/lumo \
+  -c "$LAMBDA_TASK_ROOT:/opt/cljs-runtime/src" \
+  -m "cljs-runtime.handler"

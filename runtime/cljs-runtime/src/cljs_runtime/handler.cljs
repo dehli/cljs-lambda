@@ -1,5 +1,6 @@
-(ns runtime.handler
+(ns cljs-runtime.handler
   (:require [cljs.js :refer [eval-str]]
+            [cljs-runtime.http :as http]
             [clojure.string :as string]
             [goog.object :as gobj]))
 
@@ -38,22 +39,20 @@
 (defn curl-response [headers response]
   (exec-sync (str "curl -X POST \""
                   base-path
-                  (request-id headers) "/response\" -d \"" response "\"")))
+                  (request-id headers) "/response\" -d " response)))
 
-;; Handler
+(defn -main []
+  (while true
+    (let [headers (exec-sync "mktemp")
+          event (curl-request headers)]
+      (try
+        (eval-str (atom nil)
+                  (str "(require '" handler ")"
+                       "(" handler "/-main nil)")
+                  (fn [{:keys [value]}]
+                    (curl-response headers
+                                   (js/JSON.stringify value))))
 
-(while true
-  (let [headers (exec-sync "mktemp")
-        event (curl-request headers)]
-
-    (prn handler)
-
-    (try
-      (eval-str (atom nil)
-                (str "(" handler ")")
-                (fn [{:keys [value]}]
-                  (curl-response headers value)))
-
-      (catch :exception e
-        (prn e)
-        (curl-response headers "ERROR")))))
+        (catch :exception e
+          (prn e)
+          (curl-response headers "ERROR"))))))
